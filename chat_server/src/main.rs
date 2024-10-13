@@ -13,6 +13,5 @@ async fn main() -> Result<()> {
     info!("Server is listening on {})", addr);
     let route = get_router(config);
     axum::serve(listener, route.into_make_service()).await?;
-
     Ok(())
 }

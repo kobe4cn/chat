@@ -1,6 +1,10 @@
 mod config;
+mod error;
 mod handlers;
 use handlers::*;
+mod models;
+pub use error::AppError;
+pub use models::User;
 use std::{ops::Deref, sync::Arc};
 
 use axum::{

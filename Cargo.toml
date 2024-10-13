@@ -1,4 +1,5 @@
 [workspace]
+
 members = ["chat_server", "notify_server"]
 resolver = "2"
 
@@ -24,9 +25,13 @@ serde = { version = "1.0.210", features = ["derive"] }
 serde_yaml = "0.9.34"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing = "0.1.40"
-
-sqlx = { version = "0.8.2", features = [
+sqlx = { version = "0.8.0", features = [
     "postgres",
     "runtime-tokio",
-    "tls-rustls-ring",
+    "tls-rustls",
+    "chrono",
 ] }
+ring = { version = "0.17.6", package = "ring", features = [], default-features = false }
+
+# [patch.crates-io]
+# ring = { version = "0.17.8", package = "ring", license = "OpenSSL" }

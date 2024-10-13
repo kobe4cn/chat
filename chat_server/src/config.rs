@@ -16,7 +16,7 @@ impl AppConfig {
     pub fn try_load() -> Result<Self> {
         // read from ./app.yml, or /etc/config/app.yml, or from env CHAT_CONFIG
         let ret = match (
-            File::open("app.yaml"),
+            File::open("chat_server/app.yaml"),
             File::open("/etc/config/app.yaml"),
             std::env::var("CHAT_CONFIG"),
         ) {
