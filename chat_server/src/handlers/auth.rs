@@ -4,6 +4,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use serde_json::json;
 
 use crate::{
     models::{CreateUser, SigninUser},
@@ -28,7 +29,7 @@ pub(crate) async fn signin_handler(
     match user {
         Some(user) => {
             let token = state.ek.sign(user)?;
-            Ok((StatusCode::OK, Json(token)).into_response())
+            Ok((StatusCode::OK, Json(json!({"token": token}))).into_response())
         }
         None => {
             let body = Json(ErrorOutput::new("Invalid email or password"));

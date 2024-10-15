@@ -3,6 +3,8 @@ mod error;
 mod handlers;
 use anyhow::Context;
 use handlers::*;
+use middlewares::{set_layer, verify_token};
+mod middlewares;
 mod models;
 mod utils;
 use core::fmt;
@@ -11,6 +13,7 @@ pub use models::User;
 use std::{ops::Deref, sync::Arc};
 
 use axum::{
+    middleware::from_fn_with_state,
     routing::{get, patch, post},
     Router,
 };
@@ -39,19 +42,21 @@ impl fmt::Debug for AppStateInner {
 pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
     let state = AppState::try_new(config).await?;
     let api = Router::new()
-        .route("/signin", post(signin_handler))
-        .route("/signup", post(signup_handler))
         .route("/chat", get(list_chat_handler).post(create_chat_handler))
         .route(
             "/chat/:id",
             patch(update_chat_handler).post(send_message_handler),
         )
-        .route("/chat/:id/messages", get(list_messages_handler));
+        .route("/chat/:id/messages", get(list_messages_handler))
+        .layer(from_fn_with_state(state.clone(), verify_token))
+        .route("/signin", post(signin_handler))
+        .route("/signup", post(signup_handler));
 
-    Ok(Router::new()
+    let app = Router::new()
         .route("/", get(index_handler))
         .nest("/api", api)
-        .with_state(state))
+        .with_state(state);
+    Ok(set_layer(app))
 }
 
 impl Deref for AppState {
