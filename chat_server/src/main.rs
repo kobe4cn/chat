@@ -11,7 +11,8 @@ async fn main() -> Result<()> {
     let addr = format!("{}:{}", config.server.host, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     info!("Server is listening on {})", addr);
-    let route = get_router(config);
+    let route = get_router(config).await?;
+
     axum::serve(listener, route.into_make_service()).await?;
     Ok(())
 }

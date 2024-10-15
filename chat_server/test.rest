@@ -1,2 +1,13 @@
 ### chat
-POST  http://localhost:8080/api/signin
+POST  http://localhost:8080/
+
+
+###  signup user
+POST  http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "fullname": "kevin yang",
+  "email": "kevin.yang.xgz@gmail.com",
+  "password": "test123456"
+}

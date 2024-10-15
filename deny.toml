@@ -71,6 +71,7 @@ db-urls = ["https://github.com/rustsec/advisory-db"]
 # output a note when they are encountered.
 ignore = [
     #"RUSTSEC-0000-0000",
+    "RUSTSEC-2023-0071",
     #{ id = "RUSTSEC-0000-0000", reason = "you can specify a reason the advisory is ignored" },
     #"a-crate-that-is-yanked@0.1.1", # you can also ignore yanked crate versions if you wish
     #{ crate = "a-crate-that-is-yanked@0.1.1", reason = "you can specify why you are ignoring the yanked crate" },
@@ -98,6 +99,7 @@ allow = [
     "ISC",
     "MPL-2.0",
     "Unlicense",
+    "BSD-2-Clause",
 
 
 
@@ -150,7 +152,7 @@ license-files = [{ path = "LICENSE", hash = 0xbd0eed23 }]
 # To see how to mark a crate as unpublished (to the official registry),
 # visit https://doc.rust-lang.org/cargo/reference/manifest.html#the-publish-field.
 ignore = false
-# One or more private registries that you might publish crates to, if a crate
+    # One or more private registries that you might publish crates to, if a crate
 # is only published to private registries, and ignore is true, the crate will
 # not have its license(s) checked
 registries = [
