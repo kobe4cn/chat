@@ -10,7 +10,6 @@ use crate::{
     models::{CreateUser, SigninUser},
     AppError, AppState, ErrorOutput, User,
 };
-
 pub(crate) async fn signup_handler(
     State(state): State<AppState>,
     Json(input): Json<CreateUser>,
