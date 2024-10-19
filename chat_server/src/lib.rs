@@ -9,7 +9,8 @@ mod models;
 mod utils;
 use core::fmt;
 pub use error::{AppError, ErrorOutput};
-pub use models::User;
+pub use models::{ChatUser, User, WorkSpace};
+
 use std::{ops::Deref, sync::Arc};
 
 use axum::{
@@ -48,6 +49,7 @@ pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
             patch(update_chat_handler).post(send_message_handler),
         )
         .route("/chat/:id/messages", get(list_messages_handler))
+        .route("/users", get(list_chat_users_handler))
         .layer(from_fn_with_state(state.clone(), verify_token))
         .route("/signin", post(signin_handler))
         .route("/signup", post(signup_handler));

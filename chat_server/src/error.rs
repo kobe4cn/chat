@@ -17,6 +17,8 @@ pub struct ErrorOutput {
 pub enum AppError {
     #[error("email already exists: {0}")]
     EmailAlreadyExists(String),
+    #[error("workspace not exists: {0}")]
+    WorkSpaceNotExists(String),
     #[error("sqlx error {0}")]
     SqlxError(#[from] sqlx::Error),
     #[error("password hash eoor {0}")]
@@ -43,6 +45,7 @@ impl IntoResponse for AppError {
             AppError::JwtError(_) => axum::http::StatusCode::FORBIDDEN,
             AppError::HttpHeaderError(_) => axum::http::StatusCode::UNAUTHORIZED,
             AppError::EmailAlreadyExists(_) => axum::http::StatusCode::CONFLICT,
+            AppError::WorkSpaceNotExists(_) => axum::http::StatusCode::NOT_FOUND,
         };
         (status_code, Json(ErrorOutput::new(self.to_string()))).into_response()
     }

@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(64) NOT NULL,
     --hash the argon2 password
     password VARCHAR(64) NOT NULL,
+
+    workspace VARCHAR(64) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 --create index for users for email

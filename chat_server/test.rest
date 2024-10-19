@@ -7,8 +7,30 @@ POST  http://localhost:8080/api/signup
 Content-Type: application/json
 
 {
+  "workspace": "test_workspace",
   "fullname": "kevin yang",
   "email": "kevin.yang.xgz@gmail.com",
+  "password": "test123456"
+}
+
+###  signup user
+POST  http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "workspace": "test_workspace",
+  "fullname": "yanglei",
+  "email": "yanglei@gmail.com",
+  "password": "test123456"
+}
+###  signup user
+POST  http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "workspace": "test_workspace",
+  "fullname": "leilei",
+  "email": "leilei@gmail.com",
   "password": "test123456"
 }
 
@@ -27,4 +49,9 @@ Content-Type: application/json
 
 ### get chat list
 GET  http://localhost:8080/api/chat
+Authorization: Bearer {{token}}
+
+
+### get  user list
+GET  http://localhost:8080/api/users
 Authorization: Bearer {{token}}
