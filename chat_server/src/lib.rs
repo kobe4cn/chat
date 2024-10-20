@@ -9,13 +9,13 @@ mod models;
 mod utils;
 use core::fmt;
 pub use error::{AppError, ErrorOutput};
-pub use models::{ChatUser, User, WorkSpace};
+pub use models::{Chat, ChatUser, User, WorkSpace};
 
 use std::{ops::Deref, sync::Arc};
 
 use axum::{
     middleware::from_fn_with_state,
-    routing::{get, patch, post},
+    routing::{get, post},
     Router,
 };
 pub use config::AppConfig;
@@ -43,13 +43,15 @@ impl fmt::Debug for AppStateInner {
 pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
     let state = AppState::try_new(config).await?;
     let api = Router::new()
-        .route("/chat", get(list_chat_handler).post(create_chat_handler))
-        .route(
-            "/chat/:id",
-            patch(update_chat_handler).post(send_message_handler),
-        )
-        .route("/chat/:id/messages", get(list_messages_handler))
         .route("/users", get(list_chat_users_handler))
+        .route("/chats", get(list_chat_handler).post(create_chat_handler))
+        .route(
+            "/chats/:id",
+            get(get_chat_handler)
+                .patch(update_chat_handler)
+                .post(send_message_handler),
+        )
+        .route("/chats/:id/messages", get(list_messages_handler))
         .layer(from_fn_with_state(state.clone(), verify_token))
         .route("/signin", post(signin_handler))
         .route("/signup", post(signup_handler));

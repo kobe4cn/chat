@@ -15,6 +15,10 @@ pub struct ErrorOutput {
 
 #[derive(Error, Debug)]
 pub enum AppError {
+    #[error("chat not found: {0}")]
+    NotFound(String),
+    #[error("create chat error {0}")]
+    CreateChatError(String),
     #[error("email already exists: {0}")]
     EmailAlreadyExists(String),
     #[error("workspace not exists: {0}")]
@@ -40,6 +44,8 @@ impl ErrorOutput {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response<Body> {
         let status_code = match &self {
+            AppError::NotFound(_) => axum::http::StatusCode::NOT_FOUND,
+            AppError::CreateChatError(_) => axum::http::StatusCode::BAD_REQUEST,
             AppError::SqlxError(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR,
             AppError::PasswordHashError(_) => axum::http::StatusCode::UNPROCESSABLE_ENTITY,
             AppError::JwtError(_) => axum::http::StatusCode::FORBIDDEN,

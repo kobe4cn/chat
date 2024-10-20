@@ -1,4 +1,4 @@
-use axum::{extract::State, response::IntoResponse, Extension, Json};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Json};
 
 use crate::{AppError, AppState, User, WorkSpace};
 
@@ -7,5 +7,5 @@ pub(crate) async fn list_chat_users_handler(
     Extension(user): Extension<User>,
 ) -> Result<impl IntoResponse, AppError> {
     let users = WorkSpace::fetch_all_chat_users(user.ws_id as _, &state.pool).await?;
-    Ok(Json(users))
+    Ok((StatusCode::OK, Json(users)))
 }

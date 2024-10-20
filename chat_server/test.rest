@@ -48,8 +48,24 @@ Content-Type: application/json
 
 
 ### get chat list
-GET  http://localhost:8080/api/chat
+GET  http://localhost:8080/api/chats
 Authorization: Bearer {{token}}
+
+### create chat
+POST  http://localhost:8080/api/chats
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "test chat",
+  "members": [1,2,3],
+  "public": false
+}
+
+### get chat
+GET  http://localhost:8080/api/chats/1
+Authorization : Bearer {{ token }}
+
 
 
 ### get  user list
