@@ -7,7 +7,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { workspace = true }
+tokio.workspace = true
 thiserror = { workspace = true }
 axum = { workspace = true }
 anyhow = { workspace = true }
@@ -21,9 +21,19 @@ argon2 = { version = "0.5.3", features = ["std"] }
 jwt-simple = "0.12.10"
 serde_json = "1.0.128"
 tower = "0.5.1"
-tower-http = { version = "0.6.1", features = ["compression-full", "cors", "trace", "fs"] }
+tower-http = { version = "0.6.1", features = [
+    "compression-full",
+    "cors",
+    "trace",
+    "fs",
+] }
 uuid = { version = "1.10.0", features = ["v8", "serde"] }
 axum-extra = { version = "0.9.4", features = ["typed-header"] }
+sha1 = "0.10.6"
+hex = "0.4.3"
+futures-util = { version = "0.3.31", features = ["tokio-io"] }
+mime_guess = "2.0.5"
+
 
 [dev-dependencies]
 sqlx-db-tester = "0.5.0"

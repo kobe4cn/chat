@@ -1,5 +1,6 @@
 use axum::{
     body::Body,
+    extract::multipart::MultipartError,
     response::{IntoResponse, Response},
     Json,
 };
@@ -31,6 +32,12 @@ pub enum AppError {
     JwtError(#[from] jwt_simple::Error),
     #[error("http header error {0}")]
     HttpHeaderError(#[from] axum::http::header::InvalidHeaderValue),
+    #[error("upload error {0}")]
+    UploadFileError(#[from] MultipartError),
+    #[error("create dir error {0}")]
+    CreateDirError(#[from] std::io::Error),
+    #[error("internal error {0}")]
+    InternalError(String),
 }
 
 impl ErrorOutput {
@@ -44,6 +51,9 @@ impl ErrorOutput {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response<Body> {
         let status_code = match &self {
+            AppError::InternalError(_) => axum::http::StatusCode::BAD_REQUEST,
+            AppError::UploadFileError(_) => axum::http::StatusCode::BAD_REQUEST,
+            AppError::CreateDirError(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR,
             AppError::NotFound(_) => axum::http::StatusCode::NOT_FOUND,
             AppError::CreateChatError(_) => axum::http::StatusCode::BAD_REQUEST,
             AppError::SqlxError(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR,

@@ -2,14 +2,16 @@ mod config;
 mod error;
 mod handlers;
 use anyhow::Context;
+
 use handlers::*;
 use middlewares::{set_layer, verify_token};
+use tokio::fs;
 mod middlewares;
 mod models;
 mod utils;
 use core::fmt;
 pub use error::{AppError, ErrorOutput};
-pub use models::{Chat, ChatUser, User, WorkSpace};
+pub use models::{Chat, ChatFile, ChatUser, User, WorkSpace};
 
 use std::{ops::Deref, sync::Arc};
 
@@ -53,6 +55,8 @@ pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
                 .delete(delete_chat_handler),
         )
         .route("/chats/:id/messages", get(list_messages_handler))
+        .route("/upload", post(upload_handler))
+        .route("/files/:ws_id/*path", get(download_file_handler))
         .layer(from_fn_with_state(state.clone(), verify_token))
         .route("/signin", post(signin_handler))
         .route("/signup", post(signup_handler));
@@ -74,6 +78,9 @@ impl Deref for AppState {
 
 impl AppState {
     pub async fn try_new(config: AppConfig) -> Result<Self, AppError> {
+        fs::create_dir_all(&config.server.base_dir)
+            .await
+            .context("create dir failed")?;
         let dk = utils::DecodingKey::load(&config.auth.pk).context("load dk failed")?;
         let ek = utils::EncodingKey::load(&config.auth.sk).context("load ek failed")?;
         let pool = sqlx::PgPool::connect(&config.server.db_url)

@@ -1,4 +1,5 @@
 mod chat;
+mod file;
 mod user;
 mod workspace;
 use chrono::{DateTime, Utc};
@@ -52,4 +53,10 @@ pub enum ChatType {
     Group,
     PrivateChannel,
     PublicChannel,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ChatFile {
+    pub hash: String,
+    pub ext: String,
 }
