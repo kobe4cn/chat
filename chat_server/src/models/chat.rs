@@ -15,38 +15,8 @@ pub struct CreateChat {
 impl Chat {
     pub async fn create(input: CreateChat, ws_id: u64, pool: &PgPool) -> Result<Self, AppError> {
         //对话成员必须大于2人
-        let len = input.members.len();
-        if len < 2 {
-            return Err(AppError::CreateChatError(
-                "Chat must have at least 2 members".to_string(),
-            ));
-        }
+        let chat_type = verify_chat_type(&input, pool).await?;
 
-        if len > 8 && input.name.is_none() {
-            return Err(AppError::CreateChatError(
-                "Group chat with more than 8 members must have a name".to_string(),
-            ));
-        }
-
-        //verify if all members exist
-        let users = ChatUser::fetch_by_ids(&input.members, pool).await?;
-        if users.len() != len {
-            return Err(AppError::CreateChatError(
-                "Some members do not exist".to_string(),
-            ));
-        }
-
-        let chat_type = match (&input.name, len) {
-            (None, 2) => ChatType::Single,
-            (None, _) => ChatType::Group,
-            (Some(_), _) => {
-                if input.public {
-                    ChatType::PublicChannel
-                } else {
-                    ChatType::PrivateChannel
-                }
-            }
-        };
         let chat = sqlx::query_as(
             r#"
             INSERT INTO chats(ws_id,name,type,members)
@@ -68,7 +38,7 @@ impl Chat {
             r#"
             SELECT id,ws_id,name,type,members,created_at
             FROM chats
-            WHERE ws_id=$1
+            WHERE ws_id=$1 order by created_at desc
             "#,
         )
         .bind(ws_id as i64)
@@ -90,6 +60,75 @@ impl Chat {
         .await?;
         Ok(chat)
     }
+    pub async fn update_chat(input: CreateChat, id: u64, pool: &PgPool) -> Result<Self, AppError> {
+        let chat_type = verify_chat_type(&input, pool).await?;
+
+        let chat = sqlx::query_as(
+            r#"
+            UPDATE chats
+            SET name=$1,type=$2,members=$3
+            WHERE id=$4
+            RETURNING id,ws_id,name,type,members,created_at
+            "#,
+        )
+        .bind(input.name)
+        .bind(chat_type)
+        .bind(input.members)
+        .bind(id as i64)
+        .fetch_one(pool)
+        .await?;
+        Ok(chat)
+    }
+    pub async fn delete_chat(id: u64, pool: &PgPool) -> Result<Self, AppError> {
+        let chat = sqlx::query_as(
+            r#"
+            DELETE FROM chats
+            WHERE id=$1
+            RETURNING id,ws_id,name,type,members,created_at
+            "#,
+        )
+        .bind(id as i64)
+        .fetch_one(pool)
+        .await?;
+        Ok(chat)
+    }
+}
+
+pub async fn verify_chat_type(input: &CreateChat, pool: &PgPool) -> Result<ChatType, AppError> {
+    //对话成员必须大于2人
+    let len = input.members.len();
+    if len < 2 {
+        return Err(AppError::CreateChatError(
+            "Chat must have at least 2 members".to_string(),
+        ));
+    }
+
+    if len > 8 && input.name.is_none() {
+        return Err(AppError::CreateChatError(
+            "Group chat with more than 8 members must have a name".to_string(),
+        ));
+    }
+
+    //verify if all members exist
+    let users = ChatUser::fetch_by_ids(&input.members, pool).await?;
+    if users.len() != len {
+        return Err(AppError::CreateChatError(
+            "Some members do not exist".to_string(),
+        ));
+    }
+
+    let chat_type = match (&input.name, len) {
+        (None, 2) => ChatType::Single,
+        (None, _) => ChatType::Group,
+        (Some(_), _) => {
+            if input.public {
+                ChatType::PublicChannel
+            } else {
+                ChatType::PrivateChannel
+            }
+        }
+    };
+    Ok(chat_type)
 }
 
 #[cfg(test)]

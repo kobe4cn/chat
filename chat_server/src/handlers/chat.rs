@@ -36,8 +36,21 @@ pub(crate) async fn get_chat_handler(
         None => Err(AppError::NotFound(id.to_string())),
     }
 }
-pub(crate) async fn update_chat_handler() -> impl IntoResponse {
-    "update"
+pub(crate) async fn update_chat_handler(
+    Path(id): Path<u64>,
+    State(state): State<AppState>,
+    Json(input): Json<CreateChat>,
+) -> Result<impl IntoResponse, AppError> {
+    let chat = Chat::update_chat(input, id as _, &state.pool).await?;
+    Ok((StatusCode::OK, Json(chat)))
+}
+
+pub(crate) async fn delete_chat_handler(
+    Path(id): Path<u64>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, AppError> {
+    let chat = Chat::delete_chat(id as _, &state.pool).await?;
+    Ok((StatusCode::OK, Json(chat)))
 }
 
 pub(crate) async fn send_message_handler() -> impl IntoResponse {

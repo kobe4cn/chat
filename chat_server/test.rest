@@ -23,6 +23,37 @@ Content-Type: application/json
   "email": "yanglei@gmail.com",
   "password": "test123456"
 }
+
+###  signup user
+POST  http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "workspace": "test_workspace",
+  "fullname": "yanglei1",
+  "email": "yanglei1@gmail.com",
+  "password": "test123456"
+}
+###  signup user
+POST  http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "workspace": "test_workspace",
+  "fullname": "yanglei4",
+  "email": "yanglei4@gmail.com",
+  "password": "test123456"
+}
+###  signup user
+POST  http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "workspace": "test_workspace",
+  "fullname": "yanglei5",
+  "email": "yanglei5@gmail.com",
+  "password": "test123456"
+}
 ###  signup user
 POST  http://localhost:8080/api/signup
 Content-Type: application/json
@@ -60,6 +91,31 @@ Content-Type: application/json
   "name": "test chat",
   "members": [1,2,3],
   "public": false
+}
+### create chat
+POST  http://localhost:8080/api/chats
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "test chat3",
+  "members": [1,2],
+  "public": false
+}
+
+### delete chat 3
+DELETE  http://localhost:8080/api/chats/3
+Authorization: Bearer {{token}}
+
+### update chat
+PATCH   http://localhost:8080/api/chats/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "public chat",
+  "members": [1,2],
+  "public": true
 }
 
 ### get chat

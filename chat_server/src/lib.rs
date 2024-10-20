@@ -49,7 +49,8 @@ pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
             "/chats/:id",
             get(get_chat_handler)
                 .patch(update_chat_handler)
-                .post(send_message_handler),
+                .post(send_message_handler)
+                .delete(delete_chat_handler),
         )
         .route("/chats/:id/messages", get(list_messages_handler))
         .layer(from_fn_with_state(state.clone(), verify_token))
