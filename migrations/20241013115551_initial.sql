@@ -17,7 +17,7 @@ create type chat_type as enum('single', 'group', 'private_channel', 'public_chan
 --create chat table
 CREATE TABLE IF NOT EXISTS chats (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL,
+    name VARCHAR(64),
     type chat_type NOT NULL,
     --use id list
     members BIGINT[] NOT NULL,

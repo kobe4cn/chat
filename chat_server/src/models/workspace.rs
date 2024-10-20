@@ -86,19 +86,15 @@ impl WorkSpace {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_util::get_test_pool;
+
     use super::*;
 
     use anyhow::Result;
 
-    use sqlx_db_tester::TestPg;
-
     #[tokio::test]
     async fn test_create_workspace() -> Result<()> {
-        let tdb = TestPg::new(
-            "postgres://postgres:postgres@localhost:5432/chat".to_string(),
-            std::path::Path::new("../migrations"),
-        );
-        let pool = tdb.get_pool().await;
+        let (_tdb, pool) = get_test_pool(None).await;
         let ws = WorkSpace::create("test", 0, &pool).await?;
         assert_eq!(ws.name, "test");
         Ok(())

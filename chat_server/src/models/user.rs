@@ -160,19 +160,15 @@ impl SigninUser {
 #[cfg(test)]
 
 mod tests {
-    use super::*;
+    use crate::test_util::get_test_pool;
 
-    use sqlx_db_tester::TestPg;
+    use super::*;
 
     #[tokio::test]
 
     async fn create_and_verify_user_should_work() -> Result<(), AppError> {
-        let tdb = TestPg::new(
-            "postgres://postgres:postgres@localhost:5432/chat".to_string(),
-            std::path::Path::new("../migrations"),
-        );
-        let pool = tdb.get_pool().await;
-        let email = "kevin.yang.xgz@gamil.com";
+        let (_tdb, pool) = get_test_pool(None).await;
+        let email = "kevin.yang.xgz1@gamil.com";
         let input = CreateUser::new("kevin yang", email, "password123456");
         let user = User::create(&input, &pool).await?;
         assert_eq!(user.email, email);

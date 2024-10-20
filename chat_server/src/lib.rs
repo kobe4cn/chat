@@ -87,3 +87,61 @@ impl AppState {
         })
     }
 }
+
+#[cfg(test)]
+mod test_util {
+    use std::path::Path;
+
+    use super::*;
+    use sqlx::{Executor, PgPool};
+    use sqlx_db_tester::TestPg;
+    use utils::{DecodingKey, EncodingKey};
+
+    impl AppState {
+        #[allow(unused)]
+        pub async fn new_for_test(config: AppConfig) -> Result<(TestPg, Self), AppError> {
+            let dk = DecodingKey::load(&config.auth.pk).context("load dk failed")?;
+            let ek = EncodingKey::load(&config.auth.sk).context("load ek failed")?;
+            let post = config
+                .server
+                .db_url
+                .rfind('/')
+                .expect("db url format error");
+            let server_url = &config.server.db_url[..post];
+            let (tdb, pool) = get_test_pool(Some(server_url.to_string())).await;
+            Ok((
+                tdb,
+                Self {
+                    inner: Arc::new(AppStateInner {
+                        config,
+                        dk,
+                        ek,
+                        pool,
+                    }),
+                },
+            ))
+        }
+    }
+
+    pub async fn get_test_pool(url: Option<String>) -> (TestPg, PgPool) {
+        let url = match url {
+            Some(url) => url.to_string(),
+            None => "postgres://postgres:postgres@localhost:5432".to_string(),
+        };
+        let tdb = TestPg::new(url, Path::new("../migrations"));
+        let pool = tdb.get_pool().await;
+        // run prepared sql t0 insert test data
+
+        let sql = include_str!("../fixtures/test.sql").split(";");
+        let mut ts = pool.begin().await.expect("begin transaction failed");
+        for s in sql {
+            if s.trim().is_empty() {
+                continue;
+            }
+            ts.execute(s).await.expect("execute sql failed");
+        }
+        ts.commit().await.expect("commit transaction failed");
+
+        (tdb, pool)
+    }
+}
