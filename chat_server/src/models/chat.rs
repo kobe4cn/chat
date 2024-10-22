@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
 
 use crate::{AppError, AppState};
 
-use super::{Chat, ChatType, ChatUser};
+use super::{Chat, ChatType};
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct CreateChat {
@@ -16,7 +15,7 @@ impl AppState {
     pub async fn create_chat(&self, input: CreateChat, ws_id: u64) -> Result<Chat, AppError> {
         let pool = &self.pool;
         //对话成员必须大于2人
-        let chat_type = verify_chat_type(&input, pool).await?;
+        let chat_type = self.verify_chat_type(&input).await?;
 
         let chat = sqlx::query_as(
             r#"
@@ -63,7 +62,7 @@ impl AppState {
         Ok(chat)
     }
     pub async fn update_chat(&self, input: CreateChat, id: u64) -> Result<Chat, AppError> {
-        let chat_type = verify_chat_type(&input, &self.pool).await?;
+        let chat_type = self.verify_chat_type(&input).await?;
 
         let chat = sqlx::query_as(
             r#"
@@ -94,43 +93,43 @@ impl AppState {
         .await?;
         Ok(chat)
     }
-}
 
-pub async fn verify_chat_type(input: &CreateChat, pool: &PgPool) -> Result<ChatType, AppError> {
-    //对话成员必须大于2人
-    let len = input.members.len();
-    if len < 2 {
-        return Err(AppError::CreateChatError(
-            "Chat must have at least 2 members".to_string(),
-        ));
-    }
-
-    if len > 8 && input.name.is_none() {
-        return Err(AppError::CreateChatError(
-            "Group chat with more than 8 members must have a name".to_string(),
-        ));
-    }
-
-    //verify if all members exist
-    let users = ChatUser::fetch_by_ids(&input.members, pool).await?;
-    if users.len() != len {
-        return Err(AppError::CreateChatError(
-            "Some members do not exist".to_string(),
-        ));
-    }
-
-    let chat_type = match (&input.name, len) {
-        (None, 2) => ChatType::Single,
-        (None, _) => ChatType::Group,
-        (Some(_), _) => {
-            if input.public {
-                ChatType::PublicChannel
-            } else {
-                ChatType::PrivateChannel
-            }
+    pub async fn verify_chat_type(&self, input: &CreateChat) -> Result<ChatType, AppError> {
+        //对话成员必须大于2人
+        let len = input.members.len();
+        if len < 2 {
+            return Err(AppError::CreateChatError(
+                "Chat must have at least 2 members".to_string(),
+            ));
         }
-    };
-    Ok(chat_type)
+
+        if len > 8 && input.name.is_none() {
+            return Err(AppError::CreateChatError(
+                "Group chat with more than 8 members must have a name".to_string(),
+            ));
+        }
+
+        //verify if all members exist
+        let users = self.fetch_chat_user_by_ids(&input.members).await?;
+        if users.len() != len {
+            return Err(AppError::CreateChatError(
+                "Some members do not exist".to_string(),
+            ));
+        }
+
+        let chat_type = match (&input.name, len) {
+            (None, 2) => ChatType::Single,
+            (None, _) => ChatType::Group,
+            (Some(_), _) => {
+                if input.public {
+                    ChatType::PublicChannel
+                } else {
+                    ChatType::PrivateChannel
+                }
+            }
+        };
+        Ok(chat_type)
+    }
 }
 
 #[cfg(test)]
