@@ -134,7 +134,7 @@ POST  http://localhost:8080/api/upload
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=MfnBoundary
 
---MfnBBoundary
+--MfnBoundary
 Content-Disposition: form-data;filename="actor.jpg"
 Content-Type: application/octet-stream
 

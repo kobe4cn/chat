@@ -58,7 +58,7 @@ pub(crate) async fn upload_handler(
         let data = field.bytes().await;
         match (filename, data) {
             (Some(filename), Ok(data)) => {
-                let file = ChatFile::new(&filename, &data);
+                let file = ChatFile::new(ws_id, &filename, &data);
                 let path = file.path(&base_dir);
                 if path.exists() {
                     info!("file {} already exists: {:?}", filename, path);
@@ -67,7 +67,7 @@ pub(crate) async fn upload_handler(
                         .await?;
                     fs::write(&path, data).await?;
                 }
-                files.push(file.url(ws_id as _));
+                files.push(file.url());
             }
             _ => {
                 warn!("failed to read field ");

@@ -1,5 +1,6 @@
 mod chat;
 mod file;
+mod message;
 mod user;
 mod workspace;
 use chrono::{DateTime, Utc};
@@ -57,6 +58,17 @@ pub enum ChatType {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ChatFile {
+    pub ws_id: i64,
     pub hash: String,
     pub ext: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, FromRow)]
+pub struct Message {
+    pub id: i64,
+    pub chat_id: i64,
+    pub sender_id: i64,
+    pub content: String,
+    pub files: Vec<String>,
+    pub created_at: DateTime<Utc>,
 }

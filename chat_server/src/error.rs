@@ -38,6 +38,10 @@ pub enum AppError {
     CreateDirError(#[from] std::io::Error),
     #[error("internal error {0}")]
     InternalError(String),
+    #[error("message create error {0}")]
+    MessageCreateError(String),
+    #[error("Chat file error {0}")]
+    ChatFileError(String),
 }
 
 impl ErrorOutput {
@@ -51,6 +55,8 @@ impl ErrorOutput {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response<Body> {
         let status_code = match &self {
+            AppError::ChatFileError(_) => axum::http::StatusCode::NOT_FOUND,
+            AppError::MessageCreateError(_) => axum::http::StatusCode::BAD_REQUEST,
             AppError::InternalError(_) => axum::http::StatusCode::BAD_REQUEST,
             AppError::UploadFileError(_) => axum::http::StatusCode::BAD_REQUEST,
             AppError::CreateDirError(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR,
