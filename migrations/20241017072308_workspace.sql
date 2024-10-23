@@ -17,6 +17,7 @@ BEGIN;
 INSERT INTO users (id,fullname, email, password_hash)
 VALUES (0,'super user', 'super@super.org','');
 INSERT INTO workspaces (id,name, owner_id) VALUES (0,'default', 0);
+INSERT INTO chats(ws_id, name, type,members) VALUES (0,'default', 'public_channel','{0}');
 update users set ws_id = 0 where id = 0;
 alter table users alter column ws_id set not null;
 COMMIT;

@@ -130,6 +130,21 @@ impl AppState {
         };
         Ok(chat_type)
     }
+
+    pub async fn is_chat_member(&self, chat_id: i64, user_id: i64) -> Result<bool, AppError> {
+        let chat = sqlx::query(
+            r#"
+            SELECT id
+            FROM chats
+            WHERE id=$1 and $2=ANY(members)
+            "#,
+        )
+        .bind(chat_id)
+        .bind(user_id)
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(chat.is_some())
+    }
 }
 
 #[cfg(test)]

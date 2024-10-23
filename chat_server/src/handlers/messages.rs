@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Multipart, Path, State},
+    extract::{Multipart, Path, Query, State},
     http::{HeaderMap, HeaderValue, StatusCode},
     response::IntoResponse,
     Extension, Json,
@@ -9,10 +9,16 @@ use tokio::fs;
 
 use tracing::{info, warn};
 
-use crate::{AppError, AppState, ChatFile, User};
+use crate::{models::ListMessages, AppError, AppState, ChatFile, User};
 
-pub(crate) async fn list_messages_handler() -> impl IntoResponse {
-    "list messages"
+pub(crate) async fn list_messages_handler(
+    Extension(_user): Extension<User>,
+    State(state): State<AppState>,
+    Path(id): Path<i64>,
+    Query(input): Query<ListMessages>,
+) -> Result<impl IntoResponse, AppError> {
+    let messages = state.list_messages(input, id as _).await?;
+    Ok(Json(messages))
 }
 
 pub(crate) async fn download_file_handler(

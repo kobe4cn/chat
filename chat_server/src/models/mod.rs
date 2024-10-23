@@ -3,12 +3,12 @@ mod file;
 mod message;
 mod user;
 mod workspace;
+pub use chat::CreateChat;
 use chrono::{DateTime, Utc};
+pub use message::{CreateMessage, ListMessages};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 pub use user::{CreateUser, SigninUser};
-
-pub use chat::CreateChat;
 
 #[derive(Debug, Clone, FromRow, Deserialize, Serialize, PartialEq)]
 pub struct User {

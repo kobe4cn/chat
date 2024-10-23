@@ -5,7 +5,10 @@ use axum::{
     Extension, Json,
 };
 
-use crate::{models::CreateChat, AppError, AppState, User};
+use crate::{
+    models::{CreateChat, CreateMessage},
+    AppError, AppState, User,
+};
 
 pub(crate) async fn list_chat_handler(
     Extension(user): Extension<User>,
@@ -50,6 +53,12 @@ pub(crate) async fn delete_chat_handler(
     Ok((StatusCode::OK, Json(chat)))
 }
 
-pub(crate) async fn send_message_handler() -> impl IntoResponse {
-    "send"
+pub(crate) async fn send_message_handler(
+    Extension(user): Extension<User>,
+    State(state): State<AppState>,
+    Path(id): Path<u64>,
+    Json(input): Json<CreateMessage>,
+) -> Result<impl IntoResponse, AppError> {
+    let msg = state.create_message(input, id, user.id as _).await?;
+    Ok((StatusCode::CREATED, Json(msg)))
 }
