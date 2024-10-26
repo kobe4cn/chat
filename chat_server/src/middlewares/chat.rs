@@ -4,7 +4,8 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::{AppError, AppState, User};
+use crate::{AppError, AppState};
+use core_lib::User;
 
 pub async fn verify_chat(State(state): State<AppState>, req: Request, next: Next) -> Response {
     let (mut parts, body) = req.into_parts();
@@ -17,10 +18,11 @@ pub async fn verify_chat(State(state): State<AppState>, req: Request, next: Next
         .await
         .unwrap_or_default()
     {
-        let err = AppError::MessageCreateError("You are not a member of this chat".to_string());
+        let err =
+            AppError::MessageCreateError("verify You are not a member of this chat".to_string());
         return err.into_response();
     }
-    let mut req = Request::from_parts(parts, body);
-    req.extensions_mut().insert(user);
+    let req = Request::from_parts(parts, body);
+    // req.extensions_mut().insert(user);
     next.run(req).await
 }

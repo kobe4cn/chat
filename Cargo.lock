@@ -442,6 +442,7 @@ dependencies = [
  "axum",
  "axum-extra",
  "chrono",
+ "core_lib",
  "futures-util",
  "hex",
  "jwt-simple",
@@ -533,6 +534,25 @@ name = "core-foundation-sys"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
+
+[[package]]
+name = "core_lib"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-extra",
+ "chrono",
+ "jwt-simple",
+ "serde",
+ "serde_yaml",
+ "sqlx",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tracing",
+ "uuid",
+]
 
 [[package]]
 name = "cpufeatures"
@@ -1533,6 +1553,7 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-extra",
+ "core_lib",
  "futures 0.3.31",
  "rand",
  "serde",

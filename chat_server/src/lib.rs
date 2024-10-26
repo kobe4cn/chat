@@ -2,18 +2,16 @@ mod config;
 mod error;
 mod handlers;
 use anyhow::Context;
-
+use core_lib::{set_layer, verify_token, DecodingKey, EncodingKey, TokenVerify, User};
 use handlers::*;
-use middlewares::{set_layer, verify_chat, verify_token};
+use middlewares::verify_chat;
 use tokio::fs;
 mod middlewares;
 mod models;
-mod utils;
-use core::fmt;
 pub use error::{AppError, ErrorOutput};
-pub use models::{Chat, ChatFile, ChatUser, User, WorkSpace};
+pub use models::ChatFile;
 
-use std::{ops::Deref, sync::Arc};
+use std::{fmt, ops::Deref, sync::Arc};
 
 use axum::{
     middleware::from_fn_with_state,
@@ -30,8 +28,8 @@ pub(crate) struct AppState {
 
 pub(crate) struct AppStateInner {
     pub(crate) config: AppConfig,
-    pub(crate) dk: utils::DecodingKey,
-    pub(crate) ek: utils::EncodingKey,
+    pub(crate) dk: DecodingKey,
+    pub(crate) ek: EncodingKey,
     pub(crate) pool: sqlx::PgPool,
 }
 impl fmt::Debug for AppStateInner {
@@ -61,7 +59,7 @@ pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
         .nest("/chats", chat)
         .route("/upload", post(upload_handler))
         .route("/files/:ws_id/*path", get(download_file_handler))
-        .layer(from_fn_with_state(state.clone(), verify_token))
+        .layer(from_fn_with_state(state.clone(), verify_token::<AppState>))
         .route("/signin", post(signin_handler))
         .route("/signup", post(signup_handler));
 
@@ -80,13 +78,21 @@ impl Deref for AppState {
     }
 }
 
+impl TokenVerify for AppState {
+    type Error = AppError;
+    fn verify(&self, token: &str) -> Result<User, AppError> {
+        let user = self.dk.verify(token).context("verify token failed")?;
+        Ok(user)
+    }
+}
+
 impl AppState {
     pub async fn try_new(config: AppConfig) -> Result<Self, AppError> {
         fs::create_dir_all(&config.server.base_dir)
             .await
             .context("create dir failed")?;
-        let dk = utils::DecodingKey::load(&config.auth.pk).context("load dk failed")?;
-        let ek = utils::EncodingKey::load(&config.auth.sk).context("load ek failed")?;
+        let dk = DecodingKey::load(&config.auth.pk).context("load dk failed")?;
+        let ek = EncodingKey::load(&config.auth.sk).context("load ek failed")?;
         let pool = sqlx::PgPool::connect(&config.server.db_url)
             .await
             .context("connect to db failed")?;
@@ -109,7 +115,6 @@ mod test_util {
     use super::*;
     use sqlx::{Executor, PgPool};
     use sqlx_db_tester::TestPg;
-    use utils::{DecodingKey, EncodingKey};
 
     impl AppState {
         #[allow(unused)]

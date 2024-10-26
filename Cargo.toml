@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["chat_server", "notify_server"]
+members = ["chat_server", "core_lib", "notify_server"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -31,7 +31,18 @@ sqlx = { version = "0.8.0", features = [
     "tls-rustls",
     "chrono",
 ] }
-ring = { version = "0.17.6", package = "ring", features = [], default-features = false }
-
+ring = { version = "0.17.6", package = "ring", features = [
+], default-features = false }
+chrono = { version = "0.4.38", features = ["serde"] }
+core_lib = { path = "./core_lib" }
+jwt-simple = "0.12.10"
+axum-extra = { version = "0.9.4", features = ["typed-header"] }
+tower = "0.5.1"
+tower-http = { version = "0.6.1", features = [
+    "compression-full",
+    "cors",
+    "trace",
+    "fs",
+] }
 # [patch.crates-io]
 # ring = { version = "0.17.8", package = "ring", license = "OpenSSL" }

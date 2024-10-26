@@ -1,6 +1,7 @@
 use jwt_simple::prelude::*;
 
-use crate::{AppError, User};
+use crate::User;
+use jwt_simple::Error;
 const JWT_DURATION: u64 = 30;
 const JWT_ISSUER: &str = "chat_server";
 const JWT_AUDIENCE: &str = "chat_web";
@@ -10,24 +11,24 @@ pub struct EncodingKey(Ed25519KeyPair);
 pub struct DecodingKey(Ed25519PublicKey);
 
 impl EncodingKey {
-    pub fn load(pem: &str) -> Result<Self, AppError> {
+    pub fn load(pem: &str) -> Result<Self, Error> {
         let key = Ed25519KeyPair::from_pem(pem)?;
         Ok(Self(key))
     }
-    pub fn sign(&self, user: impl Into<User>) -> Result<String, AppError> {
+    pub fn sign(&self, user: impl Into<User>) -> Result<String, Error> {
         let claims = Claims::with_custom_claims(user.into(), Duration::from_mins(JWT_DURATION))
             .with_issuer(JWT_ISSUER)
             .with_audience(JWT_AUDIENCE);
-        Ok(self.0.sign(claims)?)
+        self.0.sign(claims)
     }
 }
 impl DecodingKey {
-    pub fn load(pem: &str) -> Result<Self, AppError> {
+    pub fn load(pem: &str) -> Result<Self, Error> {
         let key = Ed25519PublicKey::from_pem(pem)?;
         Ok(Self(key))
     }
     #[allow(unused)]
-    pub fn verify(&self, token: &str) -> Result<User, AppError> {
+    pub fn verify(&self, token: &str) -> Result<User, Error> {
         let options = VerificationOptions {
             allowed_issuers: Some(HashSet::from_strings(&[JWT_ISSUER])),
             allowed_audiences: Some(HashSet::from_strings(&[JWT_AUDIENCE])),
@@ -42,7 +43,8 @@ impl DecodingKey {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Result;
+    use anyhow::*;
+
     #[tokio::test]
     async fn jwt_sign_verify_should_work() -> Result<()> {
         let encoding_pem = include_str!("../../fixtures/encoding.pem");

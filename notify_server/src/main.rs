@@ -1,13 +1,15 @@
 use anyhow::Result;
 
-use notify_server::get_router;
+use notify_server::{get_router, setup_pg_listener};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::{fmt::Layer, layer::SubscriberExt, util::SubscriberInitExt, Layer as _};
 #[tokio::main]
 async fn main() -> Result<()> {
     let layer = Layer::new().pretty().with_filter(LevelFilter::INFO);
     tracing_subscriber::registry().with(layer).init();
+
     let addr = "0.0.0.0:6687";
+    setup_pg_listener().await?;
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     info!("Server is listening on {})", addr);
     let route = get_router();

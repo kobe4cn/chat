@@ -1,13 +1,13 @@
 use std::mem;
 
-use crate::{AppError, AppState, User};
+use crate::{AppError, AppState};
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
 use serde::{Deserialize, Serialize};
 
-use super::ChatUser;
+use core_lib::{ChatUser, User};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CreateUser {
@@ -55,7 +55,8 @@ impl AppState {
         .bind(password_hash)
         .fetch_one(&self.pool)
         .await?;
-        ws.update_workspace_owner(user.id as _, &self.pool).await?;
+        self.update_workspace_owner(ws.id as _, user.id as _)
+            .await?;
         Ok(user)
     }
     #[allow(unused)]
@@ -148,18 +149,6 @@ impl CreateUser {
     }
 }
 
-impl User {
-    pub fn new(id: i64, fullname: &str, email: &str) -> Self {
-        Self {
-            id,
-            ws_id: 0,
-            fullname: fullname.to_string(),
-            email: email.to_string(),
-            password_hash: None,
-            created_at: chrono::Utc::now(),
-        }
-    }
-}
 #[allow(unused)]
 impl SigninUser {
     pub fn new(email: &str, password: &str) -> Self {

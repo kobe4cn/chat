@@ -9,7 +9,8 @@ use tokio::fs;
 
 use tracing::{info, warn};
 
-use crate::{models::ListMessages, AppError, AppState, ChatFile, User};
+use crate::{models::ListMessages, AppError, AppState, ChatFile};
+use core_lib::User;
 
 pub(crate) async fn list_messages_handler(
     Extension(_user): Extension<User>,

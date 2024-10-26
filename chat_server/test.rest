@@ -108,7 +108,7 @@ DELETE  http://localhost:8080/api/chats/3
 Authorization: Bearer {{token}}
 
 ### update chat
-PATCH   http://localhost:8080/api/chats/1
+PATCH   http://localhost:8080/api/chats/2
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -119,7 +119,7 @@ Content-Type: application/json
 }
 
 ### get chat
-GET  http://localhost:8080/api/chats/1
+GET  http://localhost:8080/api/chats/2
 Authorization : Bearer {{ token }}
 
 
@@ -152,16 +152,16 @@ Authorization : Bearer {{ token }}
 
 
 ###send a message
-POST  http://localhost:8080/api/chats/1
+POST  http://localhost:8080/api/chats/2
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "content": "hello,yang",
+  "content": "hello,lei yang",
   "files": []
 }
 
 
 ### get messages
-GET  http://localhost:8080/api/chats/1/messages?page_size=2
+GET  http://localhost:8080/api/chats/2/messages?page_size=2
 Authorization : Bearer {{ token }}

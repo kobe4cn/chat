@@ -7,9 +7,9 @@ use axum::{
 
 use crate::{
     models::{CreateChat, CreateMessage},
-    AppError, AppState, User,
+    AppError, AppState,
 };
-
+use core_lib::User;
 pub(crate) async fn list_chat_handler(
     Extension(user): Extension<User>,
     State(state): State<AppState>,
