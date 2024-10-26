@@ -80,7 +80,7 @@ impl Deref for AppState {
 
 impl TokenVerify for AppState {
     type Error = AppError;
-    fn verify(&self, token: &str) -> Result<User, AppError> {
+    fn verify(&self, token: &str) -> Result<User, Self::Error> {
         let user = self.dk.verify(token).context("verify token failed")?;
         Ok(user)
     }

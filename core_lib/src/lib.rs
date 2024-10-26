@@ -45,6 +45,7 @@ pub struct Chat {
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, sqlx::Type, PartialOrd)]
 #[sqlx(type_name = "chat_type", rename_all = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum ChatType {
     Single,
     Group,

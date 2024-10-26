@@ -1,56 +1,66 @@
+use std::{ops::Deref, sync::Arc};
+mod config;
+mod error;
+mod notify;
+
 use axum::{
+    middleware::from_fn_with_state,
     response::{Html, IntoResponse},
     routing::get,
     Router,
 };
 mod sse;
+pub use config::AppConfig;
+use core_lib::{verify_token, DecodingKey, TokenVerify, User};
+use dashmap::DashMap;
+use error::AppError;
+pub use notify::setup_pg_listener;
 
-use core_lib::{Chat, Message};
-use futures::StreamExt;
-use sqlx::postgres::PgListener;
+use notify::AppEvent;
 use sse::sse_handler;
-use tracing::info;
+use tokio::sync::broadcast;
 
-pub enum Event {
-    NewChat(Chat),
-    NewMessage(Message),
-    AddToChat(Chat),
-    RemoveFromChat(Chat),
+#[derive(Clone)]
+pub struct AppState(Arc<AppStateInner>);
+
+pub type UserMap = Arc<DashMap<u64, broadcast::Sender<Arc<AppEvent>>>>;
+pub struct AppStateInner {
+    pub config: AppConfig,
+    users: UserMap,
+    dk: DecodingKey,
+}
+impl TokenVerify for AppState {
+    type Error = AppError;
+    fn verify(&self, token: &str) -> Result<User, Self::Error> {
+        Ok(self.dk.verify(token)?)
+    }
+}
+impl Deref for AppState {
+    type Target = AppStateInner;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl AppState {
+    pub fn try_new(config: AppConfig) -> Result<Self, AppError> {
+        let dk = DecodingKey::load(&config.auth.pk)?;
+        let users = Arc::new(DashMap::new());
+        Ok(Self(Arc::new(AppStateInner { config, dk, users })))
+    }
 }
 
 const INDEX_HTML: &str = include_str!("../index.html");
-pub fn get_router() -> Router {
-    Router::new()
-        .route("/", get(index_handler))
+pub fn get_router(config: AppConfig) -> (Router, AppState) {
+    let state = AppState::try_new(config).expect("app state init failed");
+
+    let router = Router::new()
         .route("/events", get(sse_handler))
+        .layer(from_fn_with_state(state.clone(), verify_token::<AppState>))
+        .route("/", get(index_handler))
+        .with_state(state.clone());
+    (router, state)
 }
 
-pub async fn setup_pg_listener() -> anyhow::Result<()> {
-    let mut listener =
-        PgListener::connect("postgresql://postgres:postgres@localhost:5432/chat").await?;
-    listener.listen("chat_updated").await?;
-    listener.listen("chat_message_created").await?;
-    let mut stream = listener.into_stream();
-    tokio::spawn(async move {
-        while let Some(Ok(notification)) = stream.next().await {
-            match notification.channel() {
-                "chat_updated" => {
-                    info!("{:?}", notification.payload());
-                    println!("chat_updated");
-                }
-                "chat_message_created" => {
-                    info!("{:?}", notification.payload());
-                    println!("chat_message_created");
-                }
-                _ => {
-                    println!("unknown event");
-                }
-            }
-        }
-    });
-
-    Ok(())
-}
 pub async fn index_handler() -> impl IntoResponse {
     Html(INDEX_HTML)
 }

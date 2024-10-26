@@ -23,11 +23,21 @@ INSERT
 update
     or delete ON chats FOR EACH ROW EXECUTE FUNCTION add_to_chat();
 --if new message added,notify with message data
-CREATE OR REPLACE FUNCTION add_to_message() RETURNS TRIGGER AS $$ BEGIN if TG_OP = 'INSERT' then Raise Notice 'add_to_message: %',
-    NEW;
+CREATE OR REPLACE FUNCTION add_to_message() RETURNS TRIGGER AS $$
+declare USERS bigint [];
+BEGIN if TG_OP = 'INSERT' then Raise Notice 'add_to_message: %',
+NEW;
+select members into USERS
+from chats
+where id = NEW.chat_id;
 PERFORM pg_notify(
     'chat_message_created',
-    row_to_json(NEW)::text
+    json_build_object(
+        'message',
+        NEW,
+        "members",
+        USERS
+    )::text
 );
 end if;
 RETURN NEW;
