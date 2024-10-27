@@ -21,12 +21,12 @@ use axum::{
 pub use config::AppConfig;
 
 #[derive(Debug, Clone)]
-pub(crate) struct AppState {
+pub struct AppState {
     inner: Arc<AppStateInner>,
 }
 #[allow(unused)]
 
-pub(crate) struct AppStateInner {
+pub struct AppStateInner {
     pub(crate) config: AppConfig,
     pub(crate) dk: DecodingKey,
     pub(crate) ek: EncodingKey,
@@ -40,8 +40,8 @@ impl fmt::Debug for AppStateInner {
     }
 }
 
-pub async fn get_router(config: AppConfig) -> Result<Router, AppError> {
-    let state = AppState::try_new(config).await?;
+pub async fn get_router(state: AppState) -> Result<Router, AppError> {
+    // let state = AppState::try_new(config).await?;
     let chat = Router::new()
         .route(
             "/:id",
@@ -108,7 +108,7 @@ impl AppState {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "test-util")]
 mod test_util {
     use std::path::Path;
 
@@ -118,7 +118,8 @@ mod test_util {
 
     impl AppState {
         #[allow(unused)]
-        pub async fn new_for_test(config: AppConfig) -> Result<(TestPg, Self), AppError> {
+        pub async fn new_for_test() -> Result<(TestPg, Self), AppError> {
+            let config = AppConfig::try_load().context("load config failed")?;
             let dk = DecodingKey::load(&config.auth.pk).context("load dk failed")?;
             let ek = EncodingKey::load(&config.auth.sk).context("load ek failed")?;
             let post = config

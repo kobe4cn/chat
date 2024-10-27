@@ -36,6 +36,7 @@ impl AppState {
         for s in &input.files {
             let base_dir = &self.config.server.base_dir;
             let file = ChatFile::from_str(s)?;
+
             if !file.path(base_dir).exists() {
                 return Err(AppError::MessageCreateError("file not exists".to_string()));
             }

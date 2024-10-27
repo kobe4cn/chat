@@ -168,14 +168,11 @@ mod tests {
 
     use anyhow::Ok;
 
-    use crate::AppConfig;
-
     use super::*;
 
     #[tokio::test]
     async fn test_create_chat() -> Result<()> {
-        let config = AppConfig::try_load()?;
-        let (_tdb, state) = AppState::new_for_test(config).await?;
+        let (_tdb, state) = AppState::new_for_test().await?;
         let input = CreateChat::new("", &[1, 2], false);
         let ws_id = 1;
         let chat = state
@@ -190,8 +187,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_group_chat() -> Result<()> {
-        let config = AppConfig::try_load()?;
-        let (_tdb, state) = AppState::new_for_test(config).await?;
+        let (_tdb, state) = AppState::new_for_test().await?;
 
         let ws_id = 1;
         let members = &[1, 2, 3];
@@ -205,8 +201,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_public_chat_with_name() -> Result<()> {
-        let config = AppConfig::try_load()?;
-        let (_tdb, state) = AppState::new_for_test(config).await?;
+        let (_tdb, state) = AppState::new_for_test().await?;
 
         let ws_id = 1;
         let members = &[1, 2, 3];

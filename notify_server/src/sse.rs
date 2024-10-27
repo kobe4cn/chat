@@ -5,7 +5,7 @@ use axum::{
     response::{sse::Event, Sse},
     Extension,
 };
-use axum_extra::{headers, TypedHeader};
+
 use core_lib::User;
 use futures::stream::Stream;
 use tokio::sync::broadcast;
@@ -17,10 +17,7 @@ use crate::{AppEvent, AppState};
 pub(crate) async fn sse_handler(
     Extension(user): Extension<User>,
     State(state): State<AppState>,
-    TypedHeader(user_agent): TypedHeader<headers::UserAgent>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    info!("`{}` connected", user_agent.as_str());
-
     // A `Stream` that repeats an event every second
     //
     // You can also create streams from tokio channels using the wrappers in

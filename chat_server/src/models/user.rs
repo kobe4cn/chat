@@ -167,8 +167,7 @@ mod tests {
     #[tokio::test]
 
     async fn create_and_verify_user_should_work() -> Result<()> {
-        let config = crate::AppConfig::try_load()?;
-        let (_tdb, state) = AppState::new_for_test(config).await?;
+        let (_tdb, state) = AppState::new_for_test().await?;
         let email = "kevin.yang.xgz1@gamil.com";
         let input = CreateUser::new("kevin yang", email, "password123456");
         let user = state.create_user(&input).await?;

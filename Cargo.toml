@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["chat_server", "core_lib", "notify_server"]
+members = [ "chat_server", "chat_test", "core_lib", "notify_server"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -35,6 +35,9 @@ ring = { version = "0.17.6", package = "ring", features = [
 ], default-features = false }
 chrono = { version = "0.4.38", features = ["serde"] }
 core_lib = { path = "./core_lib" }
+chat_server = { path = "./chat_server" }
+notify_server = { path = "./notify_server" }
+chat_test = { path = "./chat_test" }
 jwt-simple = "0.12.10"
 axum-extra = { version = "0.9.4", features = ["typed-header"] }
 tower = "0.5.1"

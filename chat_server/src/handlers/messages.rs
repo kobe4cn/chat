@@ -58,7 +58,7 @@ pub(crate) async fn upload_handler(
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, AppError> {
     let ws_id = user.ws_id;
-    let base_dir = state.config.server.base_dir.join(ws_id.to_string());
+    let base_dir = state.config.server.base_dir.clone();
     let mut files = vec![];
     while let Some(field) = multipart.next_field().await? {
         let filename = field.file_name().map(|s| s.to_string());

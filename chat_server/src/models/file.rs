@@ -24,7 +24,7 @@ impl ChatFile {
         format!("/files/{}/{}", self.ws_id, self.hash_to_path())
     }
     pub fn path(&self, base_dir: &Path) -> PathBuf {
-        base_dir.join(self.hash_to_path())
+        base_dir.join(format!("{}/{}", self.ws_id, self.hash_to_path()))
     }
 
     //split hash into 3 parts, first 2 and 3 chars

@@ -158,7 +158,7 @@ Content-Type: application/json
 
 {
   "content": "hello,lei yang",
-  "files": []
+  "files": ["/files/1/0fd/a3e/ed0040e14b47bec49a71f08097b325950d.jpg"]
 }
 
 

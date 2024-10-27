@@ -82,7 +82,6 @@ impl AppState {
 
 #[cfg(test)]
 mod tests {
-    use crate::AppConfig;
 
     use super::*;
 
@@ -90,8 +89,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_workspace() -> Result<()> {
-        let config = AppConfig::try_load()?;
-        let (_tdb, state) = AppState::new_for_test(config).await?;
+        let (_tdb, state) = AppState::new_for_test().await?;
         let ws = state.create_workspace("test", 0).await?;
         assert_eq!(ws.name, "test");
         Ok(())
