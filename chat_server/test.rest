@@ -88,7 +88,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "test chat",
+  "name": "test chat1",
   "members": [1,2,3],
   "public": false
 }

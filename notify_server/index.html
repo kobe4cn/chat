@@ -8,22 +8,27 @@
 <body>
     <h1>SSE_HANDLER</h1>
     <script lang="javascript">
-        var source=new EventSource("events");
-        source.onmessage=function(event){
-            console.log("GOT: ", event.data);
-        }
-        source.addEventListener("NewChat", function(event){
-            console.log("NewChat", event.data);
-        });
-        source.addEventListener("AddToChat", function(event){
-            console.log("NewUser", event.data);
-        });
-        source.addEventListener("RemoveFromChat", function(event){
-            console.log("RemoveUser", event.data);
-        });
-        source.addEventListener("NewMessage", function(event){
-            console.log("NewMessage", event.data);
-        });
+        let token="eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3Mjk5OTcwMjIsImV4cCI6MTcyOTk5ODgyMiwibmJmIjoxNzI5OTk3MDIyLCJpc3MiOiJjaGF0X3NlcnZlciIsImF1ZCI6ImNoYXRfd2ViIiwiaWQiOjEsIndzX2lkIjoxLCJmdWxsbmFtZSI6ImtldmluIHlhbmciLCJlbWFpbCI6ImtldmluLnlhbmcueGd6QGdtYWlsLmNvbSIsImNyZWF0ZWRfYXQiOiIyMDI0LTEwLTI2VDE3OjQ5OjA5LjY0MTc3MFoifQ.U26U88VbBrDNe79SEYcxfNZJUDlKnO02hiAi18x0PqwzA17CNJn2z6irNqWHtBnVr3K-Z1xbL7GSE-NXCE8-Bg";
+
+        let source = new EventSource(`/events?access_token=${token}`);
+      source.onmessage = function(event) {
+        console.log("Got:", event.data);
+      };
+      source.addEventListener("NewChat", function(event) {
+        console.log("NewChat:", event.data);
+      });
+
+      source.addEventListener("AddToChat", function(event) {
+        console.log("AddToChat:", event.data);
+      });
+
+      source.addEventListener("RemoveFromChat", function(event) {
+        console.log("RemoveFromChat:", event.data);
+      });
+
+      source.addEventListener("NewMessage", function(event) {
+        console.log("NewMessage:", event.data);
+      });
 
     </script>
 </body>

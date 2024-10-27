@@ -65,6 +65,7 @@ impl AppState {
         .await?;
         Ok(message)
     }
+
     pub async fn list_messages(
         &self,
         input: ListMessages,

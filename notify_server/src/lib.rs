@@ -17,6 +17,7 @@ use error::AppError;
 pub use notify::setup_pg_listener;
 
 use notify::AppEvent;
+
 use sse::sse_handler;
 use tokio::sync::broadcast;
 
@@ -62,5 +63,6 @@ pub fn get_router(config: AppConfig) -> (Router, AppState) {
 }
 
 pub async fn index_handler() -> impl IntoResponse {
+    //
     Html(INDEX_HTML)
 }

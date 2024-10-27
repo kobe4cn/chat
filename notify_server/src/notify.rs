@@ -15,7 +15,7 @@ pub enum AppEvent {
     AddToChat(Chat),
     RemoveFromChat(Chat),
 }
-
+#[derive(Debug)]
 struct Notification {
     //user being impact
     user_ids: HashSet<u64>,
@@ -55,7 +55,10 @@ pub async fn setup_pg_listener(state: AppState) -> anyhow::Result<()> {
     tokio::spawn(async move {
         while let Some(Ok(notification)) = stream.next().await {
             let notification = Notification::load(notification.channel(), notification.payload())?;
+            info!("notification: {:?}", notification);
+
             let users = &state.users;
+            info!("users: {:?}", users);
             for user_id in notification.user_ids {
                 if let Some(tx) = users.get(&user_id) {
                     if let Err(e) = tx.send(notification.event.clone()) {
@@ -63,6 +66,7 @@ pub async fn setup_pg_listener(state: AppState) -> anyhow::Result<()> {
                     };
                 }
             }
+            info!("send event success");
         }
         Ok::<(), anyhow::Error>(())
     });

@@ -26,6 +26,8 @@ pub(crate) async fn sse_handler(
     // You can also create streams from tokio channels using the wrappers in
     // https://docs.rs/tokio-stream
     let user_id = user.id as u64;
+    info!("user_id: {}", user_id);
+    // let user_id = 2;
     let users = &state.users;
     let rx = if let Some(tx) = users.get(&user_id) {
         tx.subscribe()
@@ -36,6 +38,7 @@ pub(crate) async fn sse_handler(
     };
 
     let stream = BroadcastStream::new(rx).filter_map(|v| v.ok()).map(|v| {
+        info!("sending event: {:?}", v);
         let name = match v.as_ref() {
             AppEvent::NewChat(_) => "NewChat",
             AppEvent::NewMessage(_) => "NewMessage",
