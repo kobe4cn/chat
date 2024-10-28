@@ -88,7 +88,6 @@ pub(crate) async fn update_chat_handler(
     let chat = state.update_chat(input, id as _).await?;
     Ok((StatusCode::OK, Json(chat)))
 }
-
 pub(crate) async fn delete_chat_handler(
     Path(id): Path<u64>,
     State(state): State<AppState>,
