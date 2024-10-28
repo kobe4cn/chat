@@ -8,15 +8,16 @@ use argon2::{
 use serde::{Deserialize, Serialize};
 
 use core_lib::{ChatUser, User};
+use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, ToSchema, Serialize)]
 pub struct CreateUser {
     pub fullname: String,
     pub email: String,
     pub password: String,
     pub workspace: String,
 }
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, ToSchema, Serialize)]
 pub struct SigninUser {
     pub email: String,
     pub password: String,

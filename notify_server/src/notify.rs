@@ -52,27 +52,63 @@ pub async fn setup_pg_listener(state: AppState) -> anyhow::Result<()> {
     listener.listen("chat_updated").await?;
     listener.listen("chat_message_created").await?;
     let mut stream = listener.into_stream();
-    tokio::spawn(async move {
-        while let Some(Ok(notification)) = stream.next().await {
-            let notification = Notification::load(notification.channel(), notification.payload())?;
-            info!("notification: {:?}", notification);
 
-            let users = &state.users;
-            info!("users: {:?}", users);
-            for user_id in notification.user_ids {
-                if let Some(tx) = users.get(&user_id) {
-                    if let Err(e) = tx.send(notification.event.clone()) {
-                        info!("send event failed: {:?}", e);
-                    };
+    //多线程共享DashMap
+    let users = Arc::clone(&state.users);
+
+    tokio::spawn(async move {
+        while let Some(result) = stream.next().await {
+            match result {
+                Ok(notification) => {
+                    let notification =
+                        match Notification::load(notification.channel(), notification.payload()) {
+                            Ok(n) => n,
+                            Err(e) => {
+                                info!("Failed to load notification: {:?}", e);
+                                continue;
+                            }
+                        };
+
+                    //如果在tx.send中remove 已经发送失败的用户，会导致其他影响失效。对于.is_err()的用户，需要在发送失败后再移除
+                    //将失败的用户保存进入failed_users vec
+                    let mut failed_users = Vec::new();
+                    for user_id in notification.user_ids {
+                        if let Some(tx) = users.get(&user_id) {
+                            info!(
+                                "notification: {:?} to user {}",
+                                notification.event.clone(),
+                                &user_id
+                            );
+                            if tx.send(notification.event.clone()).is_err() {
+                                info!("send event failed for user {}", user_id);
+                                failed_users.push(user_id);
+                                // 移除用户
+                                info!("user need move from the map: {:?}", failed_users);
+                            }
+                        }
+                    }
+                    //遍历failed_users vec 从dashmap删除用户
+                    for user_id in failed_users {
+                        if users.remove(&user_id).is_some() {
+                            info!("user {} removed successfully.", user_id);
+                        }
+                    }
+
+                    info!("send event success");
+                }
+                Err(e) => {
+                    info!("stream error: {:?}", e);
+                    continue;
+                    // 可视情况决定继续或终止
                 }
             }
-            info!("send event success");
         }
         Ok::<(), anyhow::Error>(())
     });
 
     Ok(())
 }
+
 impl Notification {
     fn load(r#type: &str, playload: &str) -> anyhow::Result<Self> {
         match r#type {

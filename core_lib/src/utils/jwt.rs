@@ -16,7 +16,7 @@ impl EncodingKey {
         Ok(Self(key))
     }
     pub fn sign(&self, user: impl Into<User>) -> Result<String, Error> {
-        let claims = Claims::with_custom_claims(user.into(), Duration::from_mins(JWT_DURATION))
+        let claims = Claims::with_custom_claims(user.into(), Duration::from_days(JWT_DURATION))
             .with_issuer(JWT_ISSUER)
             .with_audience(JWT_AUDIENCE);
         self.0.sign(claims)

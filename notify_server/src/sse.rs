@@ -7,12 +7,13 @@ use axum::{
 };
 
 use core_lib::User;
-use futures::stream::Stream;
+
+use futures::Stream;
 use tokio::sync::broadcast;
 use tokio_stream::{wrappers::BroadcastStream, StreamExt};
 use tracing::info;
 
-use crate::{AppEvent, AppState};
+use crate::{notify::AppEvent, AppState};
 
 pub(crate) async fn sse_handler(
     Extension(user): Extension<User>,
@@ -34,18 +35,27 @@ pub(crate) async fn sse_handler(
         rx
     };
 
-    let stream = BroadcastStream::new(rx).filter_map(|v| v.ok()).map(|v| {
-        info!("sending event: {:?}", v);
-        let name = match v.as_ref() {
-            AppEvent::NewChat(_) => "NewChat",
-            AppEvent::NewMessage(_) => "NewMessage",
-            AppEvent::AddToChat(_) => "AddToChat",
-            AppEvent::RemoveFromChat(_) => "RemoveFromChat",
-        };
-        Ok(Event::default()
-            .data(serde_json::to_string(&v).expect("Failed to serialize event"))
-            .event(name))
-    });
+    // info!("users {}", state.users.len());
+
+    let stream = BroadcastStream::new(rx)
+        .filter_map(
+            |v: Result<
+                std::sync::Arc<AppEvent>,
+                tokio_stream::wrappers::errors::BroadcastStreamRecvError,
+            >| v.ok(),
+        )
+        .map(|v| {
+            // info!("sending event: {:?}", v);
+            let name = match v.as_ref() {
+                AppEvent::NewChat(_) => "NewChat",
+                AppEvent::NewMessage(_) => "NewMessage",
+                AppEvent::AddToChat(_) => "AddToChat",
+                AppEvent::RemoveFromChat(_) => "RemoveFromChat",
+            };
+            Ok(Event::default()
+                .data(serde_json::to_string(&v).expect("Failed to serialize event"))
+                .event(name))
+        });
 
     // let stream = stream::repeat_with(|| Event::default().data(format!("hi! {}", random::<u32>())))
     //     .map(Ok)

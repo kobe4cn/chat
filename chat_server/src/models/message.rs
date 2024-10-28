@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
+use utoipa::IntoParams;
 
 use crate::{AppError, AppState};
 
@@ -14,7 +15,7 @@ pub struct CreateMessage {
     pub content: String,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, IntoParams, Deserialize, Serialize)]
 pub struct ListMessages {
     pub last_id: Option<u64>,
     pub page_size: u64,

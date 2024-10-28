@@ -65,6 +65,16 @@ Content-Type: application/json
   "password": "test123456"
 }
 
+### signin user
+# @name signin
+POST  http://localhost:8080/api/signin
+Content-Type: application/json
+
+{
+  "email": "kevin.yang@lianwei.com.cn",
+  "password": "test123456"
+}
+
 
 ### signin user
 # @name signin
@@ -89,7 +99,7 @@ Content-Type: application/json
 
 {
   "name": "test chat1",
-  "members": [1,2,3],
+  "members": [1,2,7],
   "public": false
 }
 ### create chat
@@ -152,13 +162,13 @@ Authorization : Bearer {{ token }}
 
 
 ###send a message
-POST  http://localhost:8080/api/chats/2
+POST  http://localhost:8080/api/chats/4
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "content": "hello,lei yang",
-  "files": ["/files/1/0fd/a3e/ed0040e14b47bec49a71f08097b325950d.jpg"]
+  "files": []
 }
 
 

@@ -1,25 +1,25 @@
 mod config;
 mod error;
 mod handlers;
+mod openapi;
 use anyhow::Context;
 use core_lib::{set_layer, verify_token, DecodingKey, EncodingKey, TokenVerify, User};
 use handlers::*;
 use middlewares::verify_chat;
-use tokio::fs;
 mod middlewares;
+use openapi::OpenApiRouter;
+use tokio::fs;
 mod models;
-pub use error::{AppError, ErrorOutput};
-pub use models::ChatFile;
-
-use std::{fmt, ops::Deref, sync::Arc};
-
 use axum::{
     middleware::from_fn_with_state,
     routing::{get, post},
     Router,
 };
-pub use config::AppConfig;
+pub use error::{AppError, ErrorOutput};
+pub use models::ChatFile;
+use std::{fmt, ops::Deref, sync::Arc};
 
+pub use config::AppConfig;
 #[derive(Debug, Clone)]
 pub struct AppState {
     inner: Arc<AppStateInner>,
@@ -64,6 +64,7 @@ pub async fn get_router(state: AppState) -> Result<Router, AppError> {
         .route("/signup", post(signup_handler));
 
     let app = Router::new()
+        .openapi()
         .route("/", get(index_handler))
         .nest("/api", api)
         .with_state(state);

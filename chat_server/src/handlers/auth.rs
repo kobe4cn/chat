@@ -5,11 +5,23 @@ use axum::{
     Json,
 };
 use serde_json::json;
+use utoipa::ToSchema;
 
 use crate::{
     models::{CreateUser, SigninUser},
     AppError, AppState, ErrorOutput,
 };
+#[derive(Debug, serde::Serialize, ToSchema, serde::Deserialize)]
+pub struct AuthOutput {
+    pub token: String,
+}
+#[utoipa::path(
+    post,
+    path = "/api/signup",
+    responses(
+        (status = 200, description = "User created", body = AuthOutput)
+    )
+)]
 pub(crate) async fn signup_handler(
     State(state): State<AppState>,
     Json(input): Json<CreateUser>,
@@ -20,6 +32,19 @@ pub(crate) async fn signup_handler(
     header.insert("X-Token", token.parse()?);
     Ok((StatusCode::CREATED, header))
 }
+
+#[utoipa::path(
+    post,
+    path = "/api/signin",
+    responses(
+        (status = 200, description = "User signed in", body = AuthOutput,
+
+        examples(("Demo" = (value = json!({"email":"kevin.yang.xgz@gmail.com","password":"test123456"})))),
+
+        )
+    )
+
+)]
 pub(crate) async fn signin_handler(
     State(state): State<AppState>,
     Json(input): Json<SigninUser>,

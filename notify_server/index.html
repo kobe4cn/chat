@@ -3,33 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSE handler</title>
+    <title>SSE Handler</title>
 </head>
 <body>
     <h1>SSE_HANDLER</h1>
+    <!-- Token Input Field -->
+    <label for="tokenInput">Enter Token:</label>
+    <input type="text" id="tokenInput" placeholder="Enter your token here">
+    <button onclick="connect()">Connect</button>
+
     <script lang="javascript">
-        let token="eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3Mjk5OTcwMjIsImV4cCI6MTcyOTk5ODgyMiwibmJmIjoxNzI5OTk3MDIyLCJpc3MiOiJjaGF0X3NlcnZlciIsImF1ZCI6ImNoYXRfd2ViIiwiaWQiOjEsIndzX2lkIjoxLCJmdWxsbmFtZSI6ImtldmluIHlhbmciLCJlbWFpbCI6ImtldmluLnlhbmcueGd6QGdtYWlsLmNvbSIsImNyZWF0ZWRfYXQiOiIyMDI0LTEwLTI2VDE3OjQ5OjA5LjY0MTc3MFoifQ.U26U88VbBrDNe79SEYcxfNZJUDlKnO02hiAi18x0PqwzA17CNJn2z6irNqWHtBnVr3K-Z1xbL7GSE-NXCE8-Bg";
+        let source;
 
-        let source = new EventSource(`/events?access_token=${token}`);
-      source.onmessage = function(event) {
-        console.log("Got:", event.data);
-      };
-      source.addEventListener("NewChat", function(event) {
-        console.log("NewChat:", event.data);
-      });
+        function connect() {
+            // Get the token from the input field
+            const token = document.getElementById("tokenInput").value;
 
-      source.addEventListener("AddToChat", function(event) {
-        console.log("AddToChat:", event.data);
-      });
+            // Check if the token is not empty
+            if (!token) {
+                alert("Please enter a token.");
+                return;
+            }
 
-      source.addEventListener("RemoveFromChat", function(event) {
-        console.log("RemoveFromChat:", event.data);
-      });
+            // Close any existing EventSource connection
+            if (source) {
+                source.close();
+            }
 
-      source.addEventListener("NewMessage", function(event) {
-        console.log("NewMessage:", event.data);
-      });
+            // Initialize a new EventSource connection with the entered token
+            source = new EventSource(`/events?access_token=${token}`);
 
+            // Set up the event listeners
+            source.onmessage = function(event) {
+                console.log("Got:", event.data);
+            };
+            source.addEventListener("NewChat", function(event) {
+                console.log("NewChat:", event.data);
+            });
+            source.addEventListener("AddToChat", function(event) {
+                console.log("AddToChat:", event.data);
+            });
+            source.addEventListener("RemoveFromChat", function(event) {
+                console.log("RemoveFromChat:", event.data);
+            });
+            source.addEventListener("NewMessage", function(event) {
+                console.log("NewMessage:", event.data);
+            });
+        }
     </script>
 </body>
 </html>

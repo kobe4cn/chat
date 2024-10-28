@@ -9,9 +9,24 @@ use tokio::fs;
 
 use tracing::{info, warn};
 
-use crate::{models::ListMessages, AppError, AppState, ChatFile};
-use core_lib::User;
+use crate::{models::ListMessages, AppError, AppState, ChatFile, ErrorOutput};
+use core_lib::{Message, User};
+#[utoipa::path(
+    get,
 
+
+    path = "/api/chats/{id}/messages",
+    params(("id"=u64, Path, description="Chat ID"),ListMessages),
+    responses(
+        (status = 200, description = "Get Messages List", body=Vec<Message>),
+        (status = 400, description = "Invalid input", body=ErrorOutput),
+    ),
+    security(
+        (), // <-- make optional authentication
+        ("token" = [])
+    )
+
+)]
 pub(crate) async fn list_messages_handler(
     Extension(_user): Extension<User>,
     State(state): State<AppState>,

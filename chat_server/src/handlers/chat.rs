@@ -7,9 +7,23 @@ use axum::{
 
 use crate::{
     models::{CreateChat, CreateMessage},
-    AppError, AppState,
+    AppError, AppState, ErrorOutput,
 };
-use core_lib::User;
+use core_lib::{Chat, User};
+
+#[utoipa::path(
+    get,
+
+    description = "Get Chats List",
+    path = "/api/chats",
+    responses(
+        (status = 200, description = "Get Chats List", body=Vec<Chat>)
+    ),security(
+        (), // <-- make optional authentication
+        ("token" = [])
+    )
+
+)]
 pub(crate) async fn list_chat_handler(
     Extension(user): Extension<User>,
     State(state): State<AppState>,
@@ -17,7 +31,20 @@ pub(crate) async fn list_chat_handler(
     let chats = state.fetch_all_chat(user.ws_id as _).await?;
     Ok((StatusCode::OK, Json(chats)))
 }
+#[utoipa::path(
+    post,
 
+    description = "Create Chat",
+    path = "/api/chats",
+    responses(
+        (status = 201, description = "Create Chat", body=Chat)
+    ),
+    security(
+        (), // <-- make optional authentication
+        ("token" = [])
+    )
+
+)]
 pub(crate) async fn create_chat_handler(
     Extension(user): Extension<User>,
     State(state): State<AppState>,
@@ -26,6 +53,23 @@ pub(crate) async fn create_chat_handler(
     let chat = state.create_chat(input, user.ws_id as _).await?;
     Ok((StatusCode::CREATED, Json(chat)))
 }
+
+#[utoipa::path(
+    get,
+
+
+    path = "/api/chats/{id}",
+    params(("id"=u64, Path, description="Chat ID")),
+    responses(
+        (status = 200, description = "Get Chat", body=Chat),
+        (status = 404, description = "Chat Not Found", body=ErrorOutput)
+    ),
+    security(
+        (), // <-- make optional authentication
+        ("token" = [])
+    )
+
+)]
 pub(crate) async fn get_chat_handler(
     Path(id): Path<u64>,
     State(state): State<AppState>,

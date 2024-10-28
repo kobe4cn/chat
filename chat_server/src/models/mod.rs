@@ -4,7 +4,6 @@ mod message;
 mod user;
 mod workspace;
 pub use chat::CreateChat;
-
 pub use message::{CreateMessage, ListMessages};
 use serde::{Deserialize, Serialize};
 pub use user::{CreateUser, SigninUser};
