@@ -40,6 +40,9 @@
             source.addEventListener("NewChat", function(event) {
                 console.log("NewChat:", event.data);
             });
+            source.addEventListener("UpdateChatName", function(event) {
+                console.log("UpdateChatName:", event.data);
+            });
             source.addEventListener("AddToChat", function(event) {
                 console.log("AddToChat:", event.data);
             });

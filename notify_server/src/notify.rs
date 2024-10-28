@@ -13,6 +13,7 @@ pub enum AppEvent {
     NewChat(Chat),
     NewMessage(Message),
     AddToChat(Chat),
+    UpdateChatName(Chat),
     RemoveFromChat(Chat),
 }
 #[derive(Debug)]
@@ -117,10 +118,17 @@ impl Notification {
                 let user_ids = get_affected_user_ids(payload.old.as_ref(), payload.new.as_ref());
                 let event = match payload.op.as_str() {
                     "INSERT" => AppEvent::NewChat(payload.new.expect("new should exist")),
-                    "UPDATE" => AppEvent::AddToChat(payload.new.expect("new should exist")),
+                    "UPDATE" => {
+                        if check_chat_name_update(payload.old.as_ref(), payload.new.as_ref()) {
+                            AppEvent::UpdateChatName(payload.new.expect("new should exist"))
+                        } else {
+                            AppEvent::AddToChat(payload.new.expect("new should exist"))
+                        }
+                    }
                     "DELETE" => AppEvent::RemoveFromChat(payload.old.expect("old should exist")),
                     _ => return Err(anyhow::anyhow!("Invalid op")),
                 };
+                info!("user_ids: {:?}, event :{:?}", user_ids, event);
                 Ok(Self {
                     user_ids,
                     event: Arc::new(event),
@@ -140,13 +148,12 @@ impl Notification {
 }
 
 fn get_affected_user_ids(old: Option<&Chat>, new: Option<&Chat>) -> HashSet<u64> {
-    let user_ids = HashSet::new();
     match (old, new) {
         (Some(old), Some(new)) => {
             let old_user_ids: HashSet<_> = old.members.iter().map(|v| *v as u64).collect();
             let new_user_ids: HashSet<_> = new.members.iter().map(|v| *v as u64).collect();
             if old_user_ids == new_user_ids {
-                user_ids
+                new_user_ids
             } else {
                 old_user_ids.union(&new_user_ids).copied().collect()
             }
@@ -154,5 +161,13 @@ fn get_affected_user_ids(old: Option<&Chat>, new: Option<&Chat>) -> HashSet<u64>
         (Some(old), None) => old.members.iter().map(|v| *v as u64).collect(),
         (None, Some(new)) => new.members.iter().map(|v| *v as u64).collect(),
         (None, None) => HashSet::new(),
+    }
+}
+fn check_chat_name_update(old: Option<&Chat>, new: Option<&Chat>) -> bool {
+    match (old, new) {
+        (Some(old), Some(new)) => {
+            old.name != new.name && old.members == new.members && old.r#type == new.r#type
+        }
+        _ => false,
     }
 }

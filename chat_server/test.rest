@@ -118,13 +118,13 @@ DELETE  http://localhost:8080/api/chats/3
 Authorization: Bearer {{token}}
 
 ### update chat
-PATCH   http://localhost:8080/api/chats/2
+PATCH   http://localhost:8080/api/chats/4
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "name": "public chat",
-  "members": [1,2],
+  "members": [1,2,7],
   "public": true
 }
 
