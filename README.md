@@ -1,4 +1,4 @@
-# Geektime Rust 语言训练营
+# Rust 语言
 
 # Generate ed25519 privkey
 openssl genpkey -algorithm ed25519 -out privkey.pem
